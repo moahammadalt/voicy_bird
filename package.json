@@ -1,0 +1,19 @@
+{
+  "name": "voicy_bird",
+  "version": "1.0.0",
+  "description": "voice driven javascript canvas game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moahammadalt/voicy_bird.git"
+  },
+  "author": "mohammad <https://mohammad-altenji.firebaseapp.com/>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/moahammadalt/voicy_bird/issues"
+  },
+  "homepage": "https://github.com/moahammadalt/voicy_bird#readme"
+}

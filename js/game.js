@@ -18,6 +18,7 @@ function startGame() {
   game_bored = new component(30, 30, "https://lookinmena.com/wp-content/uploads/2018/02/Flappy_Birddd.png", 60, 120, "image");
   game_bored.gravity = 0.05;
   score = new component("20px", "Consolas", "black", 375, 35, "text");
+  game_explain = new component("18px", "Consolas", "#772e2c", 15, 100, "text", false);
   game_intro.start();
 }
 
@@ -30,7 +31,7 @@ var game_intro = {
     game_intro_text3 = new component("20px", "Consolas", "#772e2c", 380, 140, "text", false, 'game_intro');
     game_intro_text4 = new component("9px", "Consolas", "#772e2c", 10, 20, "text", false, 'game_intro');
     high_score_text = new component("25px", "Consolas", "#772e2c", 150, 60, "text", false, 'game_intro');
-    this.canvas.width = 480;
+    this.canvas.width = 500;
     this.canvas.height = 270;
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.body.childNodes[0]);
@@ -65,15 +66,15 @@ var game_area = {
     game_intro.clear();
     var el = document.querySelector( 'canvas' );
     el.parentNode.removeChild( el );
-    this.canvas.width = 480;
+    this.canvas.width = 500;
     this.canvas.height = 270;
     this.context = this.canvas.getContext("2d");
     this.interval = setInterval(updateGameArea, 20);
     document.body.insertBefore(this.canvas, document.body.childNodes[0]);
     this.frameNo = 0;
     this.score = 0;
-    updateGameArea();
     score.text="SCORE: " + game_area.score;
+    game_explain.text = `Screem to the microphone to control the bird`;
   },
   clear : function() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -217,7 +218,9 @@ function updateGameArea(m) {
       obstacles[i].x += -1;
       obstacles[i].update();
     }
-     
+    if(game_area.frameNo < 200){
+      game_explain.update();
+    }
     score.update();
     game_bored.newPos();
     game_bored.update();

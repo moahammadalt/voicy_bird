@@ -1,4 +1,4 @@
-var game_bored;
+var bird;
 var score;
 var game_area;
 var game_intro;
@@ -15,8 +15,8 @@ function startGame() {
   if(get_cookie('score') == ''){
     set_cookie('score', 0, 30);
   }
-  game_bored = new component(30, 30, "https://lookinmena.com/wp-content/uploads/2018/02/Flappy_Birddd.png", 60, 120, "image");
-  game_bored.gravity = 0.05;
+  bird = new component(30, 30, "https://lookinmena.com/wp-content/uploads/2018/02/Flappy_Birddd.png", 60, 120, "image");
+  bird.gravity = 0.05;
   score = new component("20px", "Consolas", "black", 375, 35, "text");
   game_explain = new component("18px", "Consolas", "#772e2c", 15, 100, "text", false);
   game_intro.start();
@@ -132,12 +132,20 @@ function component(width, height, color, x, y, type, dir, obj) {
     this.x += this.speedX;
     this.y += this.speedY + this.gravitySpeed;
     this.hitBottom();
+    this.hitUp();
   }
 
   this.hitBottom = function() {
     var rockbottom = game_obj.canvas.height - this.height;
     if (this.y > rockbottom) {
       this.y = rockbottom;
+      this.gravitySpeed = 0;
+    }
+  }
+
+  this.hitUp = function() {
+    if (this.y < -5) {
+      this.y = -5;
       this.gravitySpeed = 0;
     }
   }
@@ -172,7 +180,7 @@ function component(width, height, color, x, y, type, dir, obj) {
 function updateGameArea(m) {
     var x, height, gap, minHeight, maxHeight, minGap, maxGap;
     for (i = 0; i < obstacles.length; i += 1) {
-      if (game_bored.crashWith(obstacles[i])) {
+      if (bird.crashWith(obstacles[i])) {
 
         lose_text = new component("25px", "Consolas", "#772e2c", 170, 100, "text", false);
         lose_text.text = `game over`;
@@ -222,8 +230,8 @@ function updateGameArea(m) {
       game_explain.update();
     }
     score.update();
-    game_bored.newPos();
-    game_bored.update();
+    bird.newPos();
+    bird.update();
 }
 
 function everyinterval(n) {
@@ -235,7 +243,7 @@ function everyinterval(n) {
 }
 
 function accelerate(n) {
-  game_bored.gravity = n;
+  bird.gravity = n;
 }
 
 var mic = new p5.AudioIn();

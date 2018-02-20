@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/moahammadalt/voicy_bird/issues"
   },
-  "homepage": "https://github.com/moahammadalt/voicy_bird#readme"
+  "homepage": "https://github.com/moahammadalt/voicy_bird#readme",
+  "devDependencies": {
+    "gulp": "^4.0.0"
+  }
 }

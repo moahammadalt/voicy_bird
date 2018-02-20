@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/moahammadalt/voicy_bird#readme",
   "devDependencies": {
+    "browser-sync": "^2.23.6",
     "gulp": "^4.0.0"
   }
 }

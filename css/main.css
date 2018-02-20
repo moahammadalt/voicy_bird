@@ -1,0 +1,8 @@
+canvas {
+    background-image:url('https://lookinmena.com/wp-content/uploads/2018/02/background-slider-flappy-birds.jpg');
+    background-repeat:no-repeat;
+    background-size:contain;
+    height: 100%;
+	width: 100%;
+    background-position:center;
+}

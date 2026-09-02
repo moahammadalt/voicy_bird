@@ -1,23 +1,37 @@
 {
   "name": "voicy_bird",
-  "version": "1.0.0",
-  "description": "voice driven javascript canvas game",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "Voice-controlled Flappy Bird built on the Web Audio and Web Speech APIs",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "gulp",
+    "serve": "gulp",
+    "test": "node --test test/unit.test.js",
+    "test:e2e": "node test/e2e.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/moahammadalt/voicy_bird.git"
   },
+  "keywords": [
+    "game",
+    "canvas",
+    "voice",
+    "web-audio",
+    "web-speech-api",
+    "flappy-bird"
+  ],
   "author": "mohammad <https://mohammad-altenji.firebaseapp.com/>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/moahammadalt/voicy_bird/issues"
   },
-  "homepage": "https://github.com/moahammadalt/voicy_bird#readme",
+  "homepage": "https://moahammadalt.github.io/voicy_bird/",
   "devDependencies": {
-    "browser-sync": "^2.23.6",
-    "gulp": "^4.0.0"
+    "browser-sync": "^3.0.4",
+    "gulp": "^5.0.1"
   }
 }

@@ -1,0 +1,16 @@
+# dependencies
+node_modules/
+
+# editor / OS noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# logs
+npm-debug.log*
+yarn-error.log*
+
+# local test artifacts
+test/screenshots/

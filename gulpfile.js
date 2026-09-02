@@ -1,41 +1,27 @@
-var gulp = require('gulp');
+'use strict';
 
-var browserSync = require('browser-sync').create();
-browserSync.init({
-	server: "./"
-});
-browserSync.stream();
+/**
+ * Dev server with live reload.
+ *
+ *   npm start   →  http://localhost:3000
+ *
+ * The game needs a secure context for the microphone (localhost counts), so
+ * always run it through a server rather than opening index.html directly.
+ */
+const { watch } = require('gulp');
+const browserSync = require('browser-sync').create();
 
-gulp.task('default', (done)=>{
-	//gulp.watch('*.*', gulp.series('watcher'));
-	//gulp.watch('./js/*.*', gulp.series('watcher'));
-	//gulp.watch('./css/*.*', gulp.series('browser-sync'));
-	
-	gulp.watch('*.*').on('change', browserSync.reload);
-	gulp.watch('./js/*.*').on('change', browserSync.reload);
-	gulp.watch('./css/*.*').on('change', browserSync.reload);
-	
-	console.log('gulp worked');
-	done();
-});
+function serve(done) {
+  browserSync.init({
+    server: { baseDir: './' },
+    port: 3000,
+    open: false,
+    notify: false,
+    ui: false
+  });
+  watch(['index.html', 'css/**/*.css', 'js/**/*.js']).on('change', browserSync.reload);
+  done();
+}
 
-gulp.task('browser-sync', (done)=>{
-	console.log('file has changed');
-	
-	done();
-});
-
-gulp.task('another_task', (done)=>{
-	const a = 23;
-	const b = 54;
-	const c = a + b;
-	console.log(`the sum result of ${a} and ${b} is ${c}`);
-
-	done();
-});
-
-gulp.task('watcher', (done)=>{
-	console.log('file has changed');
-
-	done();
-});
+exports.serve = serve;
+exports.default = serve;

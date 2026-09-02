@@ -1,11 +1,152 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<link rel="stylesheet" type="text/css" href="./css/main.css">
-<script src="./js/lib/p5.min.js"></script>
-<script src="./js/lib/p5.sound.js"></script>
-<script src="./js/lib/p5.speech.js"></script>
-<script src="./js/game.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Voicy Bird — fly with your voice</title>
+  <meta name="description" content="A voice-controlled Flappy Bird. Scream to fly, whisper to sink, say “stop” to pause. Built with the Web Audio and Web Speech APIs.">
+  <meta name="theme-color" content="#2f8fd8">
+  <meta property="og:title" content="Voicy Bird — fly with your voice">
+  <meta property="og:description" content="Scream to fly, whisper to sink. Say “play”, “stop”, “continue” or “restart”.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cellipse cx='11' cy='13' rx='8' ry='6.5' fill='%23ffd93b' stroke='%234a3200' stroke-width='1.2'/%3E%3Cellipse cx='9' cy='14' rx='4' ry='2.6' fill='%23f5a623' stroke='%234a3200'/%3E%3Ccircle cx='14.5' cy='10.5' r='2.4' fill='%23fff' stroke='%234a3200'/%3E%3Ccircle cx='15.3' cy='10.5' r='1.1' fill='%231b2437'/%3E%3Cpath d='M18 12l4.5 1.2L18 14.6z' fill='%23ff7a1a' stroke='%234a3200' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="./css/main.css">
+  <!-- Optional webfont, loaded without blocking first paint; the game is fully playable on system fonts. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap"></noscript>
 </head>
-<body onload="startGame()"></body>
+<body>
+  <!-- icon sprite -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-bird" viewBox="0 0 24 24">
+      <path d="M3.5 12.5L.5 10l1 4z" fill="#f2b52a" stroke="#4a3200" stroke-linejoin="round"/>
+      <ellipse cx="11" cy="13" rx="8" ry="6.5" fill="#ffd93b" stroke="#4a3200" stroke-width="1.2"/>
+      <ellipse cx="9" cy="14" rx="4" ry="2.6" fill="#f5a623" stroke="#4a3200"/>
+      <circle cx="14.5" cy="10.5" r="2.4" fill="#fff" stroke="#4a3200"/>
+      <circle cx="15.3" cy="10.5" r="1.1" fill="#1b2437"/>
+      <path d="M18 12l4.5 1.2L18 14.6z" fill="#ff7a1a" stroke="#4a3200" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></symbol>
+    <symbol id="i-keyboard" viewBox="0 0 24 24"><path fill="currentColor" d="M20 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></symbol>
+    <symbol id="i-restart" viewBox="0 0 24 24"><path fill="currentColor" d="M12 5V1L7 6l5 5V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/></symbol>
+  </svg>
+
+  <main class="app">
+    <header class="topbar">
+      <h1 class="brand"><svg class="brand-bird" aria-hidden="true"><use href="#i-bird"/></svg> Voicy Bird</h1>
+      <div class="topbar-right">
+        <span id="voice-pill" class="pill" role="status" aria-live="polite">Voice off</span>
+        <button id="btn-pause" class="icon-btn" type="button" title="Pause (P / Esc)" aria-label="Pause" hidden><svg class="ico" aria-hidden="true"><use href="#i-pause"/></svg></button>
+      </div>
+    </header>
+
+    <div id="stage-wrap" class="stage-wrap">
+      <div id="stage" class="stage">
+        <canvas id="game" width="800" height="480" aria-label="Voicy Bird game canvas" role="img"></canvas>
+
+        <!-- Title -->
+        <section id="ov-title" class="overlay" aria-labelledby="title-heading">
+          <div class="panel">
+            <h2 id="title-heading" class="title">Voicy&nbsp;Bird</h2>
+            <p class="tagline">Scream to fly. Whisper to sink.<br>Say the word to play.</p>
+            <div class="actions">
+              <button id="btn-start-mic" class="btn primary" type="button"><svg class="ico" aria-hidden="true"><use href="#i-mic"/></svg><span id="start-label">Play with your voice</span></button>
+              <button id="btn-start-kb" class="btn ghost" type="button"><svg class="ico" aria-hidden="true"><use href="#i-keyboard"/></svg><span>Play with keyboard</span></button>
+            </div>
+            <p class="best">Best score: <strong id="best-title">0</strong></p>
+          </div>
+        </section>
+
+        <!-- Get ready -->
+        <section id="ov-ready" class="overlay light" hidden>
+          <div class="ready">
+            <div class="ready-title">Get ready</div>
+            <p id="ready-hint" class="ready-hint"></p>
+          </div>
+        </section>
+
+        <!-- Paused -->
+        <section id="ov-pause" class="overlay" aria-labelledby="pause-heading" hidden>
+          <div class="panel">
+            <h2 id="pause-heading" class="title small">Paused</h2>
+            <p class="tagline">Say <b>“continue”</b> to fly on, or <b>“restart”</b>.</p>
+            <div class="actions">
+              <button id="btn-resume" class="btn primary" type="button"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg><span>Continue</span></button>
+              <button id="btn-restart" class="btn ghost" type="button"><svg class="ico" aria-hidden="true"><use href="#i-restart"/></svg><span>Restart</span></button>
+              <button id="btn-menu" class="btn link" type="button">Back to menu</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Game over -->
+        <section id="ov-over" class="overlay" aria-labelledby="over-heading" hidden>
+          <div class="panel">
+            <div id="over-ribbon" class="ribbon" hidden>New best!</div>
+            <h2 id="over-heading" class="title small">Game over</h2>
+            <div class="scoreboard">
+              <div class="score-box">
+                <span class="label">Score</span>
+                <span id="over-score" class="value">0</span>
+              </div>
+              <span id="over-medal" class="medal" aria-label="medal" hidden></span>
+              <div class="score-box">
+                <span class="label">Best</span>
+                <span id="over-best" class="value">0</span>
+              </div>
+            </div>
+            <div class="actions">
+              <button id="btn-again" class="btn primary" type="button"><svg class="ico" aria-hidden="true"><use href="#i-restart"/></svg><span>Play again</span></button>
+              <button id="btn-menu2" class="btn link" type="button">Back to menu</button>
+            </div>
+            <p class="hint">Say <b>“restart”</b> or press <kbd>Enter</kbd></p>
+          </div>
+        </section>
+
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <section class="dock" aria-label="Controls and settings">
+      <div class="dock-row mic-row">
+        <button id="btn-mic" class="btn small" type="button"><svg class="ico" aria-hidden="true"><use href="#i-mic"/></svg><span id="mic-label">Enable microphone</span></button>
+        <div class="meter" title="Microphone level — the striped band is the lift zone">
+          <div id="meter-zone" class="meter-zone"></div>
+          <div id="meter-fill" class="meter-fill"></div>
+        </div>
+        <button id="btn-cal" class="btn small ghost" type="button" title="Measure your room's background noise" hidden>Calibrate</button>
+      </div>
+
+      <div class="dock-row">
+        <label class="slider">
+          <span>Sensitivity</span>
+          <input id="sensitivity" type="range" min="0" max="100" value="55" aria-label="Microphone sensitivity">
+          <output id="sens-val" for="sensitivity">talk</output>
+        </label>
+        <label class="toggle"><input id="opt-sfx" type="checkbox" checked> Sounds</label>
+        <label class="toggle" id="opt-voice-label"><input id="opt-voice" type="checkbox" checked> Voice commands</label>
+      </div>
+
+      <div class="dock-row help">
+        <span class="chip" data-cmd="play">“play”</span>
+        <span class="chip" data-cmd="pause">“stop”</span>
+        <span class="chip" data-cmd="resume">“continue”</span>
+        <span class="chip" data-cmd="restart">“restart”</span>
+        <span class="keys"><kbd>Space</kbd> hold to fly · <kbd>P</kbd> pause · <kbd>R</kbd> restart</span>
+      </div>
+    </section>
+
+    <footer class="foot">
+      Voice commands use the Web Speech API — best in Chrome.
+      <a href="https://github.com/moahammadalt/voicy_bird" rel="noopener">Source on GitHub</a>
+    </footer>
+  </main>
+
+  <script src="./js/audio.js"></script>
+  <script src="./js/speech.js"></script>
+  <script src="./js/game.js"></script>
+</body>
+</html>

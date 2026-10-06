@@ -13,7 +13,7 @@ var foo = new p5.SpeechRec('en-US', get_voice_recognizer); // speech recognition
 foo.start(true, false); // start listening
 
 function startGame() {
-  stopGameLoop();
+  pauseGameLoop();
   if (game_over_timeout !== null) {
     clearTimeout(game_over_timeout);
     game_over_timeout = null;
@@ -34,7 +34,7 @@ function startGame() {
   game_intro.start();
 }
 
-function stopGameLoop() {
+function pauseGameLoop() {
   if (game_area.interval !== null && game_area.interval !== undefined) {
     clearInterval(game_area.interval);
     game_area.interval = null;
@@ -90,7 +90,7 @@ var game_area = {
   start : function() {
     game_intro.clear();
     removeCanvas(game_intro.canvas);
-    stopGameLoop();
+    pauseGameLoop();
     this.canvas.width = 500;
     this.canvas.height = 270;
     this.context = this.canvas.getContext("2d");
@@ -214,7 +214,7 @@ function updateGameArea(m) {
 
         lose_text.update();
 
-        stopGameLoop();
+        pauseGameLoop();
         is_stoped = true;
         start_playing = false;
 
@@ -296,7 +296,7 @@ function get_voice_recognizer(){
     is_stoped = false;
   }
   if(foo.resultString == 'continue' && start_playing){
-    stopGameLoop();
+    pauseGameLoop();
     game_area.interval = setInterval(updateGameArea, 20);
     is_stoped = false;
   }
@@ -307,7 +307,7 @@ function get_voice_recognizer(){
     new_game_text.text = `say "new game" or "restart" to restart the game`;
     pause_text.update();
     new_game_text.update();
-    stopGameLoop();
+    pauseGameLoop();
     is_stoped = true;
   }
   if(foo.resultString == 'restart' || foo.resultString == 'new game'){
@@ -327,11 +327,11 @@ game_area.canvas.addEventListener('click', function() {
     new_game_text.text = `say "new game" or "restart" to restart the game`;
     pause_text.update();
     new_game_text.update();
-    stopGameLoop();
+    pauseGameLoop();
     is_stoped = true;
   }
   else{
-    stopGameLoop();
+    pauseGameLoop();
     game_area.interval = setInterval(updateGameArea, 20);
     is_stoped = false;
   }

@@ -8,10 +8,22 @@ var obstacles = [];
 var score_count = 0;
 var is_stoped = false;
 var start_playing = false;
+var game_over_timeout = null;
 var foo = new p5.SpeechRec('en-US', get_voice_recognizer); // speech recognition object (will prompt for mic access)
 foo.start(true, false); // start listening
 
 function startGame() {
+  pauseGameLoop();
+  if (game_over_timeout !== null) {
+    clearTimeout(game_over_timeout);
+    game_over_timeout = null;
+  }
+  removeCanvas(game_area.canvas);
+  obstacles = [];
+  score_count = 0;
+  is_stoped = false;
+  start_playing = false;
+
   if(get_cookie('score') == ''){
     set_cookie('score', 0, 30);
   }
@@ -20,6 +32,19 @@ function startGame() {
   score = new component("20px", "Consolas", "black", 375, 35, "text");
   game_explain = new component("18px", "Consolas", "#772e2c", 15, 100, "text", false);
   game_intro.start();
+}
+
+function pauseGameLoop() {
+  if (game_area.interval !== null && game_area.interval !== undefined) {
+    clearInterval(game_area.interval);
+    game_area.interval = null;
+  }
+}
+
+function removeCanvas(canvas) {
+  if (canvas && canvas.parentNode) {
+    canvas.parentNode.removeChild(canvas);
+  }
 }
 
 var game_intro = {
@@ -64,14 +89,16 @@ var game_area = {
   canvas : document.createElement("canvas"),
   start : function() {
     game_intro.clear();
-    var el = document.querySelector( 'canvas' );
-    el.parentNode.removeChild( el );
+    removeCanvas(game_intro.canvas);
+    pauseGameLoop();
     this.canvas.width = 500;
     this.canvas.height = 270;
     this.context = this.canvas.getContext("2d");
     this.interval = setInterval(updateGameArea, 20);
     document.body.insertBefore(this.canvas, document.body.childNodes[0]);
     this.frameNo = 0;
+    start_playing = true;
+    is_stoped = false;
     this.score = 0;
     score.text="SCORE: " + game_area.score;
     game_explain.text = `Screem to the microphone to control the bird`;
@@ -187,20 +214,15 @@ function updateGameArea(m) {
 
         lose_text.update();
 
-        clearInterval(game_area.interval);
+        pauseGameLoop();
+        is_stoped = true;
+        start_playing = false;
 
-        setTimeout(function(){
-          is_stoped = false;
-          start_playing = false;
-          obstacles = [];
-          if(score_count > get_cookie('score')){
-            set_cookie('score', score_count/2, 30)
+        game_over_timeout = setTimeout(function(){
+          game_over_timeout = null;
+          if(score_count > Number(get_cookie('score') || 0)){
+            set_cookie('score', score_count/2, 30);
           }
-          score_count = 0;
-          clearInterval(game_area.interval);
-          game_area.clear();
-          var el = document.querySelector( 'canvas' );
-          el.parentNode.removeChild( el );
           startGame();
         }, 3000);
 
@@ -274,6 +296,7 @@ function get_voice_recognizer(){
     is_stoped = false;
   }
   if(foo.resultString == 'continue' && start_playing){
+    pauseGameLoop();
     game_area.interval = setInterval(updateGameArea, 20);
     is_stoped = false;
   }
@@ -284,18 +307,10 @@ function get_voice_recognizer(){
     new_game_text.text = `say "new game" or "restart" to restart the game`;
     pause_text.update();
     new_game_text.update();
-    clearInterval(game_area.interval);
+    pauseGameLoop();
     is_stoped = true;
   }
   if(foo.resultString == 'restart' || foo.resultString == 'new game'){
-    is_stoped = false;
-    start_playing = false;
-    obstacles = [];
-    score_count = 0;
-    clearInterval(game_area.interval);
-    game_area.clear();
-    var el = document.querySelector( 'canvas' );
-    el.parentNode.removeChild( el );
     startGame();
   }
 }
@@ -312,10 +327,11 @@ game_area.canvas.addEventListener('click', function() {
     new_game_text.text = `say "new game" or "restart" to restart the game`;
     pause_text.update();
     new_game_text.update();
-    clearInterval(game_area.interval);
+    pauseGameLoop();
     is_stoped = true;
   }
   else{
+    pauseGameLoop();
     game_area.interval = setInterval(updateGameArea, 20);
     is_stoped = false;
   }
